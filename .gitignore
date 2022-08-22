@@ -1,0 +1,15 @@
+.vscode
+node_modules
+lib
+out
+dist
+
+.DS_Store
+.env*
+*.log
+*.tar
+*.gz
+*.tgz
+*.zip
+
+!.npm-offline-mirror/*
