@@ -2,7 +2,7 @@
 
 Mirror dependencies to TAR archives in a local directory for offline installation.
 
-**NOTE:** NPM is the only supported package manager.
+[![build](https://github.com/Shakeskeyboarde/npm-offline-mirror/actions/workflows/build.yml/badge.svg)](https://github.com/Shakeskeyboarde/npm-offline-mirror/actions/workflows/build.yml)
 
 ## Usage
 
