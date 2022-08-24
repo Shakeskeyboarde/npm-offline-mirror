@@ -3,7 +3,7 @@
   "description": "Fast, safe, reproducible builds using NPM.",
   "author": "Chris Ackerman <chris@topher.land>",
   "license": "ISC",
-  "version": "0.1.3",
+  "version": "1.0.0",
   "files": [
     "lib/**"
   ],
@@ -19,20 +19,19 @@
     "test": "del-cli out && rc test -o",
     "prepack": "del-cli lib *.tgz && tsc --project tsconfig.build.json && chmodx --package",
     "start": "npm run prepack && node lib/bin.js",
-    "modernize": "ncu -i --format group"
+    "modernize": "npx npm-check-updates -i --format group"
   },
   "devDependencies": {
     "@types/gunzip-maybe": "^1.4.0",
-    "@types/jest": "^28.1.7",
-    "@types/node": "^18.7.11",
-    "@types/pacote": "^11.1.5",
+    "@types/ini": "^1.3.31",
+    "@types/jest": "^28.1.8",
+    "@types/node": "~16.0.0",
     "@types/ssri": "^7.1.1",
     "chmodx": "^1.0.0",
     "del-cli": "^5.0.0",
     "eslint": "^8.22.0",
     "eslint-config-rational": "^1.0.4",
     "jest": "^28.1.3",
-    "npm-check-updates": "^16.0.5",
     "parallel-rc": "^1.0.12",
     "prettier": "^2.7.1",
     "source-map-support": "^0.5.21",
@@ -40,11 +39,15 @@
     "typescript": "^4.7.4"
   },
   "dependencies": {
-    "@lerna/npm-conf": "^5.4.3",
     "gunzip-maybe": "^1.4.2",
-    "pacote": "^13.6.2",
+    "ini": "^3.0.1",
     "ssri": "^9.0.1"
   },
+  "engines": {
+    "npm": ">=7",
+    "node": ">=16"
+  },
+  "engineStrict": true,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Shakeskeyboarde/npm-offline-mirror.git"

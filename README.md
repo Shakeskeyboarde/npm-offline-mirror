@@ -44,8 +44,18 @@ Add the command to the `postinstall` script.
 }
 ```
 
+## Requirements
+
+- NodeJS >= 16.12
+- NPM >= 7
+
 ## Alternatives
 
-Yarn has built-in support for offline mirroring. However, you have to use Yarn. I personally prefer not to for various reasons. Your mileage may vary.
+Yarn has built-in support for offline mirroring. However Yarn v1 is buggy, and v2 uses PnP which I am not a fan of.
 
-The [shrinkpack](https://www.npmjs.com/package/shrinkpack) package was the original implementation of this pattern for NPM. There were even plans once (2018) to [integrate it into NPM](https://blog.npmjs.org/post/173239798780/beyond-npm6-the-future-of-the-npm-cli.html). However, it a) only supports the https://registry.npmjs.org registry, b) does not support registry credentials, and c) does not maintain backwards compatibility with v1 lock files (NPM v5 and v6).
+The [shrinkpack](https://www.npmjs.com/package/shrinkpack) package was the original implementation of this pattern for NPM. There were even plans once (2018) to [integrate it into NPM](https://blog.npmjs.org/post/173239798780/beyond-npm6-the-future-of-the-npm-cli.html). However, it has the following limitations.
+
+- Only supports the https://registry.npmjs.org registry.
+- Does not support registry credentials.
+- Does not maintain backwards compatibility with v1 lock files (NPM v5 and v6).
+- Slow downloads (single threaded).

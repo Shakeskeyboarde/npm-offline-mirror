@@ -1,13 +1,13 @@
-import { type Credentials } from '@lerna/npm-conf';
 import gunzip from 'gunzip-maybe';
 import nodeFs from 'node:fs';
-import { type Readable } from 'node:stream';
-import pacote from 'pacote';
+import nodeStream, { type Readable } from 'node:stream';
 import ssri from 'ssri';
 
+import { type Credentials } from './config.js';
+import { fetch } from './fetch.js';
 import { createStreamPromise } from './stream.js';
 
-const getStreamIntegrity = async (readable: Readable): Promise<string | null> => {
+const getStreamIntegrity = async (readable: Readable): Promise<string> => {
   return ssri.fromStream(readable).then((integrity) => integrity.toString());
 };
 
@@ -25,30 +25,38 @@ const getFilenameIntegrity = async (filename: string): Promise<string | null> =>
   return await integrityPromise;
 };
 
-const getResolvedIntegrity = async (
-  resolved: string,
+const getUrlIntegrity = async (
+  url: `${'http' | 'https'}://${string}`,
   credentials: Credentials | undefined,
-  onReadable?: (tarball: Readable) => Promise<void>,
-): Promise<string | null> => {
-  return pacote.tarball.stream(
-    resolved,
-    async (tarball) => {
-      const tarballPromise = createStreamPromise(tarball).catch(() => {
-        throw new Error(`Failed to download ${JSON.stringify(resolved)}`);
-      });
-      const unzip = tarball.pipe(gunzip());
-      const readablePromise = onReadable?.(unzip) ?? Promise.resolve();
-      const integrityPromise = getStreamIntegrity(unzip).catch(() => {
-        throw new Error(`Failed to calculate integrity for ${JSON.stringify(resolved)}`);
-      });
-
-      await tarballPromise;
-      await readablePromise;
-
-      return await integrityPromise;
+  onReadable?: (readable: Readable) => Promise<void>,
+): Promise<string> => {
+  const res = await fetch(url, {
+    __tls: credentials?.tls,
+    headers: {
+      Accept: 'application/octet-stream',
+      ...(credentials?.auth ? { Authorization: credentials.auth } : {}),
     },
-    credentials,
-  );
+  });
+
+  if (!res.body) {
+    throw new Error(`Empty response from ${JSON.stringify(url)}`);
+  } else if (!res.ok) {
+    throw new Error(`Failed to download ${JSON.stringify(url)} (Status: ${res.status})`);
+  }
+
+  const bodyPromise = createStreamPromise(res.body).catch(() => {
+    throw new Error(`Failed to download ${JSON.stringify(url)}`);
+  });
+  const unzip = res.body.pipe(gunzip());
+  const readablePromise = onReadable?.(unzip.pipe(new nodeStream.PassThrough())) ?? Promise.resolve();
+  const integrityPromise = getStreamIntegrity(unzip.pipe(new nodeStream.PassThrough())).catch(() => {
+    throw new Error(`Failed to calculate integrity for ${JSON.stringify(url)}`);
+  });
+
+  await bodyPromise;
+  await readablePromise;
+
+  return await integrityPromise;
 };
 
-export { getFilenameIntegrity, getResolvedIntegrity };
+export { getFilenameIntegrity, getUrlIntegrity };
