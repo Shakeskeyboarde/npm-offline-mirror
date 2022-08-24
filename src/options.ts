@@ -1,4 +1,4 @@
-import { parseArgs } from 'node:util';
+import nodeUtil from 'node:util';
 
 type Options = {
   readonly help: boolean;
@@ -6,7 +6,7 @@ type Options = {
 };
 
 const getOptions = (args: readonly string[]): Options => {
-  const options = parseArgs({
+  const options = nodeUtil.parseArgs({
     args: [...args],
     options: {
       help: { type: 'boolean' },

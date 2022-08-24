@@ -1,4 +1,4 @@
-import fs from 'node:fs';
+import nodeFs from 'node:fs';
 
 import { createConfig } from './config.js';
 import { getFilenameIntegrity, getResolvedIntegrity } from './integrity.js';
@@ -46,13 +46,13 @@ const updateDependencies = (
 const update = async (): Promise<void> => {
   const config = createConfig();
   const directory = config.getOfflineMirrorPath();
-  const lock: Lock = JSON.parse(fs.readFileSync('package-lock.json', 'utf8'));
+  const lock: Lock = JSON.parse(nodeFs.readFileSync('package-lock.json', 'utf8'));
 
-  fs.mkdirSync(directory, { recursive: true });
+  nodeFs.mkdirSync(directory, { recursive: true });
 
   const cache = new Map<string, { integrity: string; resolved: string }>();
   const archives = new Set(
-    fs
+    nodeFs
       .readdirSync(directory)
       .filter((filename) => filename.endsWith('.tar'))
       .map((filename) => `${directory}/${filename}`),
@@ -87,7 +87,7 @@ const update = async (): Promise<void> => {
       cache.get(`${id}@${record.version}`)?.integrity ??
       (await getFilenameIntegrity(filename).catch((error) => console.log(`${error}`))) ??
       (await getResolvedIntegrity(record.resolved, config.getCredentialsByUrl(record.resolved), async (tarball) => {
-        await createStreamPromise(tarball.pipe(fs.createWriteStream(filename))).catch(() => {
+        await createStreamPromise(tarball.pipe(nodeFs.createWriteStream(filename))).catch(() => {
           throw new Error(`Failed to write ${JSON.stringify(filename)}`);
         });
       }).catch((error) => console.log(`${error}`)));
@@ -109,7 +109,7 @@ const update = async (): Promise<void> => {
   }
 
   for (const unusedFilename of unusedFilenames) {
-    fs.unlinkSync(unusedFilename);
+    nodeFs.unlinkSync(unusedFilename);
     console.log(`- ${unusedFilename}`);
   }
 
@@ -122,8 +122,8 @@ const update = async (): Promise<void> => {
       updateDependencies(lock.dependencies, cache);
     }
 
-    fs.writeFileSync('package-lock.json', JSON.stringify(lock, null, '  ') + '\n');
-    await fs.promises.unlink('node_modules/.package-lock.json').catch(() => undefined);
+    nodeFs.writeFileSync('package-lock.json', JSON.stringify(lock, null, '  ') + '\n');
+    await nodeFs.promises.unlink('node_modules/.package-lock.json').catch(() => undefined);
     console.log('mirror changes made to package-lock.json ');
   }
 

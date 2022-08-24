@@ -1,6 +1,6 @@
 import { type Credentials } from '@lerna/npm-conf';
 import gunzip from 'gunzip-maybe';
-import fs from 'node:fs';
+import nodeFs from 'node:fs';
 import { type Readable } from 'node:stream';
 import pacote from 'pacote';
 import ssri from 'ssri';
@@ -12,7 +12,7 @@ const getStreamIntegrity = async (readable: Readable): Promise<string | null> =>
 };
 
 const getFilenameIntegrity = async (filename: string): Promise<string | null> => {
-  const readable = fs.createReadStream(filename);
+  const readable = nodeFs.createReadStream(filename);
   const readablePromise = createStreamPromise(readable);
   const integrityPromise = getStreamIntegrity(readable.pipe(gunzip())).catch(() => {
     throw new Error(`Failed to calculate integrity of ${JSON.stringify(filename)}`);

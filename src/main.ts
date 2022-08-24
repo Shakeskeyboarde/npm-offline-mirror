@@ -1,6 +1,6 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import url from 'node:url';
+import nodeFs from 'node:fs';
+import nodePath from 'node:path';
+import nodeUrl from 'node:url';
 
 import { getOptions } from './options.js';
 import { update } from './update.js';
@@ -15,8 +15,8 @@ const main = async (args = process.argv.slice(2)): Promise<void> => {
   }
 
   if (options.version) {
-    const dirname = path.dirname(url.fileURLToPath(import.meta.url));
-    const pkg = JSON.parse(fs.readFileSync(path.resolve(dirname, '../package.json'), 'utf8'));
+    const dirname = nodePath.dirname(nodeUrl.fileURLToPath(import.meta.url));
+    const pkg = JSON.parse(nodeFs.readFileSync(nodePath.resolve(dirname, '../package.json'), 'utf8'));
     console.log(pkg.version);
     return;
   }
