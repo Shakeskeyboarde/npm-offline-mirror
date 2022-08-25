@@ -5,7 +5,7 @@ type Limiter = <TReturn>(task: () => Promise<TReturn>) => Promise<TReturn>;
 const createLimiter = (): Limiter => {
   let active = 0;
 
-  const max = nodeOs.cpus().length + 1;
+  const max = Math.min(5, nodeOs.cpus().length + 1);
   const queue: (() => Promise<void>)[] = [];
   const next = () => {
     if (active > max) {

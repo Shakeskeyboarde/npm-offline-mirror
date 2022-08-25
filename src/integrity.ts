@@ -1,28 +1,40 @@
-import gunzip from 'gunzip-maybe';
+import nodeCrypto from 'node:crypto';
 import nodeFs from 'node:fs';
 import nodeStream, { type Readable } from 'node:stream';
-import ssri from 'ssri';
+import nodeZlib from 'node:zlib';
 
 import { type Credentials } from './config.js';
 import { fetch } from './fetch.js';
 import { createStreamPromise } from './stream.js';
 
-const getStreamIntegrity = async (readable: Readable): Promise<string> => {
-  return ssri.fromStream(readable).then((integrity) => integrity.toString());
+const getIntegrity = (readable: Readable): Promise<string> => {
+  const hash = nodeCrypto.createHash('sha512', {
+    encoding: 'base64',
+  });
+
+  return new Promise((resolve, reject) => {
+    hash.on('error', reject);
+    readable.on('error', reject);
+    readable.on('end', () => {
+      hash.end();
+      resolve(`sha512-${hash.read()}`);
+    });
+    readable.pipe(hash);
+  });
 };
 
 const getFilenameIntegrity = async (filename: string): Promise<string | null> => {
   const readable = nodeFs.createReadStream(filename);
-  const readablePromise = createStreamPromise(readable);
-  const integrityPromise = getStreamIntegrity(readable.pipe(gunzip())).catch(() => {
-    throw new Error(`Failed to calculate integrity of ${JSON.stringify(filename)}`);
-  });
+  const unzipped =
+    filename.endsWith('.tgz') || filename.endsWith('.tar.gz') ? readable.pipe(nodeZlib.createGunzip()) : readable;
 
-  if (!(await readablePromise.then(() => true).catch(() => false))) {
+  return await getIntegrity(unzipped).catch((error) => {
+    if (error.code !== 'ENOENT') {
+      throw new Error(`Failed to calculate integrity of ${JSON.stringify(filename)}`);
+    }
+
     return null;
-  }
-
-  return await integrityPromise;
+  });
 };
 
 const getUrlIntegrity = async (
@@ -47,9 +59,9 @@ const getUrlIntegrity = async (
   const bodyPromise = createStreamPromise(res.body).catch(() => {
     throw new Error(`Failed to download ${JSON.stringify(url)}`);
   });
-  const unzip = res.body.pipe(gunzip());
-  const readablePromise = onReadable?.(unzip.pipe(new nodeStream.PassThrough())) ?? Promise.resolve();
-  const integrityPromise = getStreamIntegrity(unzip.pipe(new nodeStream.PassThrough())).catch(() => {
+  const unzipped = url.endsWith('.tgz') || url.endsWith('.tar.gz') ? res.body.pipe(nodeZlib.createGunzip()) : res.body;
+  const readablePromise = onReadable?.(unzipped.pipe(new nodeStream.PassThrough())) ?? Promise.resolve();
+  const integrityPromise = getIntegrity(unzipped.pipe(new nodeStream.PassThrough())).catch(() => {
     throw new Error(`Failed to calculate integrity for ${JSON.stringify(url)}`);
   });
 

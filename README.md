@@ -18,15 +18,21 @@ Download package tarballs for inclusion in source control and update `package-lo
 
 ## Why
 
+- Restore packages faster and without network access when freshly cloned (eg. running `npm ci --offline` in a CI/CD pipeline).
 - Perfectly replicate builds at any point in source control history.
-- Restore packages offline (ie. `npm ci --offline`).
 - Protect against supply chain attacks like the [left-pad incident](https://blog.npmjs.org/post/141577284765/kik-left-pad-and-npm).
 - Improve awareness of shipped dependencies.
 - Parity with Yarn which has this functionality [built-in](https://classic.yarnpkg.com/blog/2016/11/24/offline-mirror/).
 
 ## When
 
-Run the `npm-offline-mirror` command in your project root every time a dependency is modified. The (semi-)automatic solution is to add the command to the `package.json` file's `postinstall` script.
+Run the `npm-offline-mirror` command in your project root every time a dependency is modified.
+
+```sh
+npx npm-offline-mirror
+```
+
+You can also add the command to a `package.json` file `postinstall` script so that the mirror is updated whenever the `install` or `ci` commands are invoked.
 
 Install this package as a dev dependency.
 
@@ -43,6 +49,8 @@ Add the command to the `postinstall` script.
   }
 }
 ```
+
+The command is a no-op if there's no `package-lock.json` file in the working directory, so it's safe to include the `postinstall` script even if your package will be consumed by other packages as a dependency.
 
 ## Requirements
 
