@@ -19,7 +19,7 @@ Download package tarballs for inclusion in source control and update `package-lo
 
 ## Why
 
-- Restore packages faster and without network access when freshly cloned (eg. running `npm ci --offline` in a CI/CD pipeline).
+- Restore packages faster and without network (eg. when running `npm ci --offline` in a CI/CD pipeline).
 - Perfectly replicate builds at any point in source control history.
 - Protect against supply chain attacks like the [left-pad incident](https://blog.npmjs.org/post/141577284765/kik-left-pad-and-npm).
 - Improve awareness of shipped dependencies.

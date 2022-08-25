@@ -38,6 +38,10 @@ jobs:
           fail_ci_if_error: true
           verbose: true
 
+      - name: Delay
+        run: sleep 3m
+        shell: bash
+
       - name: Publish (NPM)
         continue-on-error: true
         run: npm publish --access public --ignore-scripts *.tgz
