@@ -26,5 +26,6 @@ module.exports = {
   roots: ['src'],
   setupFilesAfterEnv: [],
   testEnvironment: 'node',
+  testMatch: ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(test).[jt]s?(x)'],
   verbose: true,
 };
