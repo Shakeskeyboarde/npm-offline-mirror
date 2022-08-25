@@ -3,7 +3,7 @@
   "description": "Fast, safe, reproducible builds using NPM.",
   "author": "Chris Ackerman <chris@topher.land>",
   "license": "ISC",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "files": [
     "lib/**"
   ],

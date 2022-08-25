@@ -6,7 +6,7 @@ Fast, safe, reproducible builds using NPM.
 
 ## What
 
-Updates `package-lock.json` to point at tarballs checked in to source control.
+Download package tarballs for inclusion in source control and update `package-lock.json` to point to them.
 
 ## How
 
