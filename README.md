@@ -3,6 +3,7 @@
 Fast, safe, reproducible builds using NPM.
 
 [![build](https://github.com/Shakeskeyboarde/npm-offline-mirror/actions/workflows/build.yml/badge.svg)](https://github.com/Shakeskeyboarde/npm-offline-mirror/actions/workflows/build.yml)
+[![downloads](https://badgen.net/npm/v/npm-offline-mirror?icon=npm&label=version)](https://www.npmjs.com/package/npm-offline-mirror)
 
 ## What
 
