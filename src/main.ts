@@ -25,6 +25,8 @@ const main = async (args = process.argv.slice(2)): Promise<void> => {
   const lock = await readLock();
 
   if (!lock) {
+    process.exitCode = 1;
+    console.error('No "package-lock.json" file found');
     return;
   }
 

@@ -11,7 +11,7 @@ Download package tarballs for inclusion in source control and update `package-lo
 
 ## How
 
-1. Read `package-lock.json` to find all dependencies that resolve to a registry URL starting with `https:` (or `http:`).
+1. Find all dependencies in `package-lock.json` that resolve to a registry URL starting with `https:` (or `http:`).
 2. Download the exact same `.tgz` files that `npm install` downloads, honoring all configured (`.npmrc`) registries and registry credentials.
 3. Decompress the `.tgz` files into `.tar` files.
 4. Save the `.tar` files into the project's `.npm-offline-mirror` directory (configurable).
@@ -33,25 +33,7 @@ Run the `npm-offline-mirror` command in your project root every time a dependenc
 npx npm-offline-mirror
 ```
 
-You can also add the command to a `package.json` file `postinstall` script so that the mirror is updated whenever the `install` or `ci` commands are invoked.
-
-Install this package as a dev dependency.
-
-```sh
-npm i -D npm-offline-mirror
-```
-
-Add the command to the `postinstall` script.
-
-```json
-{
-  "scripts": {
-    "postinstall": "npm-offline-mirror"
-  }
-}
-```
-
-The command is a no-op if there's no `package-lock.json` file in the working directory, so it's safe to include the `postinstall` script even if your package will be consumed by other packages as a dependency.
+There is currently no way to automatically trigger this command when dependencies change, because NPM does not expose any scripts or other hooks which would allow a command to be run. As an alternative, a pre-commit Git hook could be used to ensure the command is run on every commit.
 
 ## Requirements
 
@@ -65,6 +47,7 @@ Yarn has built-in support for offline mirroring. However Yarn v1 is buggy, and v
 The [shrinkpack](https://www.npmjs.com/package/shrinkpack) package was the original implementation of this pattern for NPM. There were even plans once (2018) to [integrate it into NPM](https://blog.npmjs.org/post/173239798780/beyond-npm6-the-future-of-the-npm-cli.html). However, it has the following limitations.
 
 - Only supports the https://registry.npmjs.org registry.
-- Does not support registry credentials.
-- Does not maintain backwards compatibility with v1 lock files (NPM v5 and v6).
+- No support for registry credentials.
+- No backwards compatibility with v1 lock files (NPM v5 and v6).
 - Slow downloads (single threaded).
+- Uses over 130 dependencies (including transitive).

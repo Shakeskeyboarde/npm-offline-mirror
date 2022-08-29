@@ -1,8 +1,9 @@
-import ini from 'ini';
 import nodeFs from 'node:fs';
 import nodeOs from 'node:os';
 import nodePath from 'node:path';
 import nodeUrl from 'node:url';
+
+import { type Ini, parseIni } from './ini.js';
 
 type Credentials = {
   readonly auth?: string;
@@ -16,9 +17,9 @@ type Config = {
 
 const ENV_CONFIG_PREFIX = 'npm_config_';
 
-const readConfigFile = (filename: string): Record<string, string> => {
+const readConfigFile = (filename: string): Ini => {
   try {
-    return ini.parse(nodeFs.readFileSync(filename, 'utf8'));
+    return parseIni(nodeFs.readFileSync(filename, 'utf8'));
   } catch (error: any) {
     if (error.code !== 'ENOENT') {
       throw error;
@@ -56,7 +57,7 @@ const replaceVariables = (value: string): string => {
   });
 };
 
-const loadConfig = (): Record<string, string> => {
+const loadConfig = (): Ini => {
   const env = getEnvConfig();
   const config = {
     ...readConfigFile(env.userconfig || nodePath.join(nodeOs.homedir(), '.npmrc')),
@@ -65,7 +66,10 @@ const loadConfig = (): Record<string, string> => {
   };
 
   Object.keys(config).forEach((key) => {
-    config[key] = replaceVariables(config[key] ?? '');
+    const values = config[key];
+    config[key] = Array.isArray(values)
+      ? values.map((value) => replaceVariables(value))
+      : replaceVariables(values ?? '');
   });
 
   return config;
@@ -73,7 +77,7 @@ const loadConfig = (): Record<string, string> => {
 
 const createConfig = (): Config => {
   const config = loadConfig();
-  const mirrorPath = config['npm-offline-mirror'] || '.npm-offline-mirror';
+  const mirrorPath = config['npm-offline-mirror']?.toString() || '.npm-offline-mirror';
 
   return {
     getCredentialsByUrl: (url): Credentials | undefined => {
@@ -85,12 +89,12 @@ const createConfig = (): Config => {
 
       for (let registry = pathname; registry !== ''; registry = registry.replace(/([^/]+|\/)$/u, '')) {
         const prefix = `//${host}${registry}:`;
-        const certFile = config[`${prefix}certfile`];
-        const keyFile = config[`${prefix}keyfile`];
-        const authToken = config[`${prefix}_authToken`];
-        const auth_ = config[`${prefix}_auth`];
-        const username = config[`${prefix}username`];
-        const password = config[`${prefix}_password`];
+        const certFile = config[`${prefix}certfile`]?.toString();
+        const keyFile = config[`${prefix}keyfile`]?.toString();
+        const authToken = config[`${prefix}_authToken`]?.toString();
+        const auth_ = config[`${prefix}_auth`]?.toString();
+        const username = config[`${prefix}username`]?.toString();
+        const password = config[`${prefix}_password`]?.toString();
         const ssl = certFile != null && keyFile != null ? { certFile, keyFile } : undefined;
         const auth =
           authToken != null
